@@ -1,0 +1,35 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: cl.exe 生成活动文件",
+            "command": "cl.exe",
+            "args": [
+                "/Zi",
+                "/EHsc",
+                "/nologo",
+                "/Fe:",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${file}",
+                "/DYNAMICBASE",     // 说明下面需要链接的库
+                "user32.lib",
+                "gdi32.lib",
+                "/link",                   // 这个必须的，不然下面的选项不生效，说明要下面要使用什么链接选项
+                // "/SUBSYSTEM:CONSOLE",  // 说明这是个控制台程序，main作为入口
+                "/SUBSYSTEM:WINDOWS",     //  说明这是个窗口程序，WinMain作为入口
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "调试器生成的任务。"
+        }
+    ],
+    "version": "2.0.0"
+}
