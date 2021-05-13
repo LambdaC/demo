@@ -13,7 +13,7 @@
                 // "/Fi.\\preprocessed\\",  // 生成预处理之后的文件
                 "/Fe:",
                 "${workspaceFolder}\\bin\\main.exe", // 目标程序
-                "${workspaceFolder}\\*.cpp",        // 编译文件
+                "${workspaceFolder}\\src\\*.cpp",        // 编译文件
                 "/I${workspaceFolder}\\include",    // 指定头文件路径
                 "/I${workspaceFolder}",             // 指定头文件路径
                 "/Fo${workspaceFolder}\\objs\\",    // 指定objs文件生成路径
