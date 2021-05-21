@@ -1,0 +1,46 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: cl.exe 生成活动文件",
+            "command": "cl.exe",
+            "args": [
+                "/Zi",
+                "/EHsc",
+                "/nologo",
+                "/DVK_NO_PROTOTYPES",   // /D 定义宏，这个VK_NO_PROTOTYPES宏vulkan会用到
+                "/DDEBUG",              // 定义DEBUG宏
+                // "/LDd",                   // 使用_DEBUG宏定义
+                "/DVK_USE_PLATFORM_WIN32_KHR", // windows平台下vulkan使用wsi extension时会用到
+                // "/P",                    // 需要跟下面的一起使用
+                // "/Fi.\\preprocessed\\",  // 生成预处理之后的文件
+                "/Fe:",
+                "${workspaceFolder}\\bin\\main.exe", // 目标程序
+                "${workspaceFolder}\\src\\*.cpp",        // 编译文件
+                "${workspaceFolder}\\src\\wsi\\windows.cpp",   // windows平台下需要编译这个源文件
+                "/I${workspaceFolder}\\include",    // 指定头文件路径
+                "/I${workspaceFolder}\\src",             // 指定头文件路径
+                "/Fo${workspaceFolder}\\objs\\",    // 指定objs文件生成路径
+                "/Fd${workspaceFolder}\\pdbs\\",    // 指定pdbs文件生成路径
+                "/DYNAMICBASE",     // 说明下面需要链接的库
+                "user32.lib",
+                "gdi32.lib",
+                // "/link",                   // 这个必须的，不然下面的选项不生效，说明要下面要使用什么链接选项
+                // "/SUBSYSTEM:CONSOLE",  // 说明这是个控制台程序，main作为入口
+                // "/SUBSYSTEM:WINDOWS",     //  说明这是个窗口程序，WinMain作为入口
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "调试器生成的任务。"
+        }
+    ],
+    "version": "2.0.0"
+}

@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/src/",
+                "${workspaceFolder}/include/"
+            ],
+            "defines": [
+                "DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "VK_NO_PROTOTYPES", // vulkun会用到
+                "VK_USE_PLATFORM_WIN32_KHR" // windows平台下vulkan使用wsi extension时会用到
+            ],
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerPath": "D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29910/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ],
+    "version": 4
+}
