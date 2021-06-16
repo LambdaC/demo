@@ -88,7 +88,6 @@ namespace VulkanUtil
     {                                                                                                        \
         if (std::string(enabled_extension) == std::string(extension))                                        \
         {                                                                                                    \
-            std::cout << "Loading: " << enabled_extension << std::endl;                                      \
             VulkanFunctions::name = (PFN_##name)VulkanFunctions::vkGetDeviceProcAddr(logical_device, #name); \
             if (VulkanFunctions::name == nullptr)                                                            \
             {                                                                                                \

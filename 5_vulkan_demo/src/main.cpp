@@ -2,8 +2,38 @@
 #include "VulkanFunctions.h"
 #include "wsi.hpp"
 #include <iostream>
+#include <algorithm>
 
 // PS:下面的描述中，方法和函数等同，实例和对象等同
+
+VKAPI_ATTR VkBool32 VKAPI_CALL fnDebugCallback(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserDate)
+{
+    if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+    {
+        std::cout << "[VK_DEBUG_REPORT] ERROR: [" << pLayerPrefix << "] Code " << msgCode << " : " << pMsg << std::endl;
+    }
+    else if (msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
+    {
+        std::cout << "[VK_DEBUG_REPORT] WARNING: [" << pLayerPrefix << "] Code " << msgCode << " : " << pMsg << std::endl;
+    }
+    else if (msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT)
+    {
+        std::cout << "[VK_DEBUG_REPORT] INFORMATION:[" << pLayerPrefix << "] Code " << msgCode << " : " << pMsg << std::endl;
+    }
+    else if (msgFlags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)
+    {
+        std::cout << "[VK_DEBUG_REPORT] PERFORMANCE: [" << pLayerPrefix << "] Code " << msgCode << " : " << pMsg << std::endl;
+    }
+    else if (msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
+    {
+        std::cout << "[VK_DEBUG_REPORT] DEBUG: [" << pLayerPrefix << "] Code " << msgCode << " : " << pMsg << std::endl;
+    }
+    else
+    {
+        return VK_FALSE;
+    }
+    return VK_SUCCESS;
+};
 
 int main()
 {
@@ -84,8 +114,14 @@ int main()
         return 0;
     }
 
+    // 存储需要的layers的name
+    std::vector<char const *> desired_layers = {
+        // "VK_LAYER_KHRONOS_validation" //
+    };
+
     // 存储需要的extensions的name
     std::vector<char const *> desired_extensions = WSI::getDesiredExtensions();
+    desired_extensions.emplace_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 
 #ifdef DEBUG
     std::cout << "\nInstance Extensions: " << std::endl;
@@ -106,6 +142,14 @@ int main()
         VK_MAKE_VERSION(1, 0, 0) //
     };
 
+    VkDebugReportCallbackEXT debug_report_callback = VK_NULL_HANDLE;
+    VkDebugReportCallbackCreateInfoEXT debug_report_callback_create_info{};
+    debug_report_callback_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    debug_report_callback_create_info.pfnCallback = (PFN_vkDebugReportCallbackEXT)(&fnDebugCallback);
+    debug_report_callback_create_info.pUserData = nullptr;
+    debug_report_callback_create_info.pNext = nullptr;
+    debug_report_callback_create_info.flags = VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT;
+
     // step 3-2 先看step 3-1
     // VkInstanceCreateInfo的使用参看下面的链接：
     // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkInstanceCreateInfo.html
@@ -113,11 +157,11 @@ int main()
     // 第五个参数和第六个参数指定需要使用的Layer数和Extension数，具体使用看step 3-4和step 3-5
     VkInstanceCreateInfo instance_create_info = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        nullptr,
+        &debug_report_callback_create_info,
         0,
         &application_info,
-        0,
-        nullptr,
+        desired_layers.size(),
+        desired_layers.data(),
         desired_extensions.size(),
         desired_extensions.data() //为了格式化时，下面的};不会自动放在这行后面而加的注释
     };
@@ -138,6 +182,13 @@ int main()
     // step 3-6 加载instance level的API和一些extensions相关的API
     if (!VulkanUtil::LoadInstanceLevelFunctions(instance, desired_extensions))
     {
+        return 0;
+    }
+
+    result = VulkanFunctions::vkCreateDebugReportCallbackEXT(instance, &debug_report_callback_create_info, nullptr, &debug_report_callback);
+    if (result != VK_SUCCESS || debug_report_callback == VK_NULL_HANDLE)
+    {
+        std::cout << "Create Debug Report Callback Failed!" << std::endl;
         return 0;
     }
 
@@ -204,7 +255,7 @@ int main()
     // 创建logical device时会创建与之关联的queue
     VkDeviceQueueCreateInfo device_queue_create_info{};
     device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    device_queue_create_info.pNext = nullptr;
+    device_queue_create_info.pNext = NULL;
     device_queue_create_info.flags = 0;
     //queueFamilyIndex is an unsigned integer indicating the index of the
     // queue family in which to create the queue on this device.
@@ -222,7 +273,7 @@ int main()
     // step 5-2 先看step 5-1
     VkDeviceCreateInfo device_create_info{};
     device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    device_create_info.pNext = nullptr;
+    device_create_info.pNext = NULL;
     device_create_info.flags = 0;
     device_create_info.pEnabledFeatures = nullptr;
     device_create_info.queueCreateInfoCount = queue_create_infos.size();
@@ -259,6 +310,7 @@ int main()
 
     // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/vkspec.html#vkGetPhysicalDeviceSurfaceSupportKHR
     // 打开上面的链接看这个API的作用
+    // 验证选择的queue family是否支持Surface
     VkBool32 isPresentationSupported;
     VulkanFunctions::vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, queue_family_index, surface, &isPresentationSupported);
     if (!isPresentationSupported)
@@ -280,12 +332,36 @@ int main()
     std::vector<VkSurfaceFormatKHR> supported_surface_formats(surface_format_count);
     result = VulkanFunctions::vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &surface_format_count, supported_surface_formats.data());
 
+    // 验证一下支不支持想要的fomat，因为下面创建swapchain时需要指定format
+    // VkFormat desired_format = VK_FORMAT_R8G8B8A8_UNORM;
+    // VkColorSpaceKHR desired_color_space = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+    VkSurfaceFormatKHR desired_surface_format = {
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_COLOR_SPACE_SRGB_NONLINEAR_KHR //
+    };
+
+    bool isSupport{false};
+    for (auto &surface_format : supported_surface_formats)
+    {
+        if (surface_format.format == desired_surface_format.format && surface_format.colorSpace == desired_surface_format.colorSpace)
+        {
+            isSupport = true;
+            break;
+        }
+    }
+
+    if (!isSupport)
+    {
+        std::cout << "No desired surface format supported!" << std::endl;
+        return 0;
+    }
+
     // 操作显卡的命令，需要用到command、command buffer、command pool等相关的东西
     // 创建command pool，使用vkCreateCommandPool API
     VkCommandPool command_pool = VK_NULL_HANDLE;
     VkCommandPoolCreateInfo command_pool_create_info{};
     command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    command_pool_create_info.pNext = nullptr;
+    command_pool_create_info.pNext = NULL;
     command_pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     command_pool_create_info.queueFamilyIndex = queue_family_index; // 创建command pool时需要指定与哪个queue关联的。
     result = VulkanFunctions::vkCreateCommandPool(device, &command_pool_create_info, nullptr, &command_pool);
@@ -299,7 +375,7 @@ int main()
     VkCommandBuffer command_buffer = VK_NULL_HANDLE;
     VkCommandBufferAllocateInfo command_buffer_allocate_info{};
     command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    command_buffer_allocate_info.pNext = nullptr;
+    command_buffer_allocate_info.pNext = NULL;
     command_buffer_allocate_info.commandPool = command_pool;
     command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     command_buffer_allocate_info.commandBufferCount = 1;
@@ -309,6 +385,84 @@ int main()
         std::cout << "Create Command Buffer Failed!" << std::endl;
         return 0;
     }
+
+    // 创建SwapChain
+
+    // 先Query一下surface支持的功能/特性
+    VkSurfaceCapabilitiesKHR surface_capabilities;
+    result = VulkanFunctions::vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &surface_capabilities);
+    if (result != VK_SUCCESS)
+    {
+        std::cout << "Get Surface Capabilities Failed!" << std::endl;
+        return 0;
+    }
+    /**
+     * Choosing a size of swapchain images
+     */
+    VkExtent2D size_of_images = {1920, 1080};
+    // 是否支持窗口的大小由surface的属性来定
+    if (surface_capabilities.currentExtent.width == 0xFFFFFFFF)
+    {
+        size_of_images = {1920, 1080};
+    }
+    size_of_images.width = max(size_of_images.width, surface_capabilities.minImageExtent.width);
+    size_of_images.width = min(size_of_images.width, surface_capabilities.maxImageExtent.width);
+    size_of_images.height = max(size_of_images.height, surface_capabilities.minImageExtent.width);
+    size_of_images.height = min(size_of_images.height, surface_capabilities.maxImageExtent.height);
+
+    /**
+     * Selecting desired usage scenarios of swapchain images
+     */
+    VkImageUsageFlags desired_usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if (!(desired_usage & surface_capabilities.supportedUsageFlags))
+    {
+        std::cout << "Surface Can not support some Image Usage!" << std::endl;
+        return 0;
+    }
+
+    /**
+     * Selecting a transformation of swapchain images
+     */
+    VkSurfaceTransformFlagBitsKHR surface_transform;
+    VkSurfaceTransformFlagBitsKHR desired_transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+    if (desired_transform & surface_capabilities.supportedTransforms)
+    {
+        surface_transform = desired_transform;
+    }
+    else
+    {
+        surface_transform = surface_capabilities.currentTransform;
+    }
+
+    VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+    VkSwapchainKHR old_swapchain = VK_NULL_HANDLE;
+
+    VkSwapchainCreateInfoKHR swapchain_create_info{};
+    swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapchain_create_info.surface = surface;
+    swapchain_create_info.minImageCount = 2u;
+    swapchain_create_info.imageFormat = desired_surface_format.format;
+    swapchain_create_info.imageColorSpace = desired_surface_format.colorSpace;
+    swapchain_create_info.imageExtent = size_of_images;
+    swapchain_create_info.imageArrayLayers = 1;
+    swapchain_create_info.imageUsage = desired_usage;
+    swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    swapchain_create_info.preTransform = desired_transform;
+    swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapchain_create_info.presentMode = VK_PRESENT_MODE_FIFO_KHR; // 其实还是需要使用vkGetPhysicalDeviceSurfacePresentModesKHR API去获取一下支持哪些mode的
+    swapchain_create_info.clipped = VK_TRUE;
+    swapchain_create_info.oldSwapchain = old_swapchain;
+    result = VulkanFunctions::vkCreateSwapchainKHR(device, &swapchain_create_info, nullptr, &swapchain);
+    if (result != VK_SUCCESS || swapchain == VK_NULL_HANDLE)
+    {
+        std::cout << "Create Swapchain Failed!" << std::endl;
+        return 0;
+    }
+
+    uint32_t swapchain_image_count{0};
+    result = VulkanFunctions::vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, nullptr);
+    std::vector<VkImage> swapchain_images(swapchain_image_count);
+    result = VulkanFunctions::vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, swapchain_images.data());
 
     return 0;
 }
