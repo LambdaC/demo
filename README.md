@@ -17,3 +17,5 @@
 [webgl-demo](webgl-demo)
 
 [webgl-lab](webgl-lab)
+
+[vulkan_demo2](vulkan_demo2)
