@@ -1,0 +1,5 @@
+Q：vkCreateInstance返回的VkResult值为-6(VK_ERROR_LAYER_NOT_PRESENT)
+A：按照书上，设置了个环境变量：setx VK_INSTANCE_LAYERS VK_LAYER_LUNARG_standard_validation
+但是使用vkEnumerateInstanceExtensionProperties方法去获得可用的Layer时，发现可用的
+Layer并没有VK_LAYER_LUNARG_standard_validation，应该是这个原因导致创建失败，
+把环境变量删了，创建就成功了。
