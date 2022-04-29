@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <script src="src/Engine/Core.js"></script>
+    <script src="src/Engine/VertexBuffer.js"></script>
+    <script src="src/Engine/SimpleShader.js"></script>
+    <script src="src/Game/MyGame.js"></script>
+
+    <!--
+        暂时把shader源码写在这里，然后在js中使用
+        aSquareVertexPosition就是该vertex shader的输入
+        gl_Position是一个内置的变量，也是vertex shader的输出
+    -->
+    <script type="x-shader/x-vertex" id="VertexShader">
+        attribute vec3 aSquareVertexPosition; void main(void) { gl_Position = vec4(aSquareVertexPosition, 1.0); }
+    </script>
+
+    <!--
+        fragment shader要处理的是光栅化后的屏幕像素。
+        光栅化其实就是去计算图元该用屏幕上的哪些像素来表示。
+        而这些像素就是fragment shader要处理的对象。
+    -->
+    <script type="x-shader/x-fragment" id="FragmentShader">
+        void main(void) { gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); }
+    </script>
+</body>
+
+</html>
