@@ -6,9 +6,11 @@ a = BaseObject.new(1)
 b = BaseObject.new(2)
 c = PlayerObject.new()
 d = PlayerObject.new()
-e = OtherObject.new()
+e = OtherObject.new(3)
+f = OtherObject.new(4)
 
 print(e:GetEntity())
+print(f:GetEntity())
 
 -- print(a)
 -- print(b)
