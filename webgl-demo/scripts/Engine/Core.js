@@ -67,6 +67,7 @@ function drawTriangle(gl) {
     // 好了，到此为此，我们的pipeline已经构建好了，接下来就是要给它喂数据了。
 
     // 在给pipeline喂数据之前，必须把app中的数据传到GPU，GPU的内存一般叫做buffer，所以我们先创建一个用来存数据的buffer
+    // 其实这个buffer应该是CPU的内存。bufferData的时候才会真正分配显存。
     let buffer = gl.createBuffer();
     // 那怎么把数据传到这个buffer里呢？需要下面两个步骤
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer); // 这个一次只能bind一个，如果bind另外一个，那么之前bind的就会解bind。
