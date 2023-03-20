@@ -35,12 +35,12 @@ function drawTriangle(gl) {
     // 比如要把这三个点画出来，要怎么处理
     // 假设三角形的三个点都不在NDC下，怎么办
     let vertives = [
-        0, 0, 0, // 第一个点
-        5, 10, 0, // 第二个点
-        10, 0, 0, //  第三个点
-        // 0.5, 0.5, 0, //
-        // 0.5, -0.5, 0, //
-        // -0.5, -0.5, 0 //
+        // 0, 0, 0, // 第一个点
+        // 5, 10, 0, // 第二个点
+        // 10, 0, 0, //  第三个点
+        0.5, 0.5, 0, //
+        0.5, -0.5, 0, //
+        -0.5, 0, 0 //
     ];
 
     // 不管怎样，想要画出来，必须要把这些数据发给GPU吧
@@ -105,7 +105,8 @@ function drawTriangle(gl) {
 
 
     // 一切准备就绪，让webGL把这些点当作三角形的点把它画出来吧。
-    gl.drawArrays(gl.TRIANGLES, 0, vertives.length / 3);
+    // gl.viewport(0, 0, 150, 75);
+    gl.drawArrays(gl.TRIANGLES, 0, vertives.length / 3); // 因为这里drawArrays，所以用的数据是与gl.ARRAY_BUFFER绑定的buffer
 
 }
 
