@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Curve Line</title>
+
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+        position: absolute;
+        /* margin-left: 10%; */
+      }
+
+      #fps {
+        position: absolute;
+        z-index: 9;
+        margin-left: 50%;
+        margin-right: 50%;
+        font-size: 20px;
+        color: #ffffff;
+      }
+
+      .container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div id="fps">fps</div>
+      <canvas id="renderCanvas" touch-action="none"></canvas>
+    </div>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+  </body>
+</html>

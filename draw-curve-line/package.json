@@ -1,0 +1,31 @@
+{
+  "name": "curve-line",
+  "version": "1.0.0",
+  "description": "",
+  "private": "true",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "live-server": "npx live-server ./dist",
+    "tsc": "tsc",
+    "build": "npx webpack --config ./webpack.config.js",
+    "dist": "npx webpack --mode production --config ./webpack.config.js",
+    "server": "npx webpack-dev-server",
+    "format": "npx prettier --write ",
+    "write": "npx prettier --write src/",
+    "check": "npx prettier --check src/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babylonjs": "^5.3.0",
+    "html-webpack-plugin": "^5.5.0",
+    "live-server": "^1.2.1",
+    "prettier": "2.6.2",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.3",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.8.1"
+  }
+}
