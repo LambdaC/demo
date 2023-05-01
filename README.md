@@ -19,3 +19,9 @@
 [webgl-lab](webgl-lab)
 
 [vulkan_demo2](vulkan_demo2)
+
+[image-merge](image-merge)
+
+[lua_oop](lua_oop)
+
+[draw-curve-line](draw-curve-line)
